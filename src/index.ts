@@ -19,12 +19,32 @@ export interface Env {
   // MY_BUCKET: R2Bucket;
 }
 
-export default {
-  async fetch(
-    request: Request,
-    env: Env,
-    ctx: ExecutionContext
-  ): Promise<Response> {
-    return new Response("Hello World!");
-  },
-};
+import {Router} from 'itty-router'
+import { corsHelper } from './cors-helper'
+
+const router = Router();
+
+router.options('*', corsHelper)
+router.get('/', () => {
+  return new Response("Hello GET!")
+})
+
+router.post('/', () => {
+  return new Response("Hello POST!")
+})
+
+router.put('/', () => {
+  return new Response("Hello PUT")
+})
+
+router.delete('/', () => {
+  return new Response("Hello DELETE")
+})
+
+// 404 for everything else
+router.all('*', () => new Response('Not Found.', { status: 404 }))
+
+// attach the router "handle" to the event handler
+addEventListener('fetch', event =>
+  event.respondWith(router.handle(event.request))
+)
